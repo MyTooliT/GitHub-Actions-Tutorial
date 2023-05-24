@@ -58,3 +58,43 @@ The picture above shows us that out workflow contains exactly one job called `li
 The “Set up job” section tells us some information about the runner (computer that executed the job). For example, we can see that the operating system of the runner is Ubuntu `22.04.2`, because we used the value `ubuntu-latest` for the key `runs-on`.
 
 The section “Run printf 'Hello, World\n'” shows us the output of our only workflow step. Just like we expected the shell command we used (`printf …`) prints the text “Hello, World”.
+
+### Describing a Workflow
+
+While navigating the workflow and the output for our small example was reasonable, it makes sense to describe
+
+- the workflow,
+- the jobs (that are part of a workflow) and
+- the steps (that are part of a job)
+
+further. To do that we can use the key `name`. Let us add some basic description to our “Hello World” workflow:
+
+```yaml
+name: Hello World
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print “Hello, World”
+        run: printf 'Hello, World\n'
+```
+
+After we commit and push our changes the list of workflows:
+
+<img src="Pictures/Hello World Workflows.webp" alt="Hello World Workflows" width="300"/>
+
+the job name:
+
+<img src="Pictures/Hello World Job.webp" alt="Hello World Job" width="250"/>
+
+and our job step:
+
+<img src="Pictures/Hello World Step.webp" alt="Hello World Step" width="350"/>
+
+displays the name we provided.
