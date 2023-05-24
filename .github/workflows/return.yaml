@@ -1,0 +1,17 @@
+name: Return Values
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute command that sets return value to 1
+        # Quotes are required, since the text `false` represent the
+        # **boolean value “false”**. The text `"false"` (with quotes)
+        # on the other hand represent the **string `false`**.
+        run: "false"
+
