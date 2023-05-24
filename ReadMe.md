@@ -155,3 +155,39 @@ While the workflow “Hello World” finished successfully, just like before, th
 We take a closer look and see that the step “Execute command that sets return value to 1” did indeed set the exit value to 1:
 
 <img src="Pictures/Return Value False.webp" alt="Return Value False" width="450"/>
+
+## Multiple Steps
+
+Since we now know how we can write a basic workflow containing a single step it is time to look at how we can execute jobs after each other. For that purpose we remove `hello.yaml` and `return.yaml` and add a new workflow called `multiple steps.yaml` in the directory `.github/workflows`:
+
+```yaml
+name: Sequential Execution
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Works
+        run: "true"
+
+      - name: Fails
+        run: "false"
+
+      - name: Works too
+        run: "true"
+```
+
+As you can see this workflow contains three jobs called
+
+- “Works”,
+- “Fails” and
+- “Works too”.
+
+These steps will be executed one after each other. The whole job will fail after the first step that fails. Steps after the first failed step will not be executed. We can see that, if we take a look at the output of our job:
+
+<img src="Pictures/Multiple Steps.webp" alt="Multiple Steps" width="200"/>
