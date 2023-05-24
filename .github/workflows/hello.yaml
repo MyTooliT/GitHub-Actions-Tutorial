@@ -1,0 +1,9 @@
+on:
+  - push
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: printf 'Hello, World\n'
