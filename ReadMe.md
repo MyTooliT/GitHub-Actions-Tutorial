@@ -98,3 +98,60 @@ and our job step:
 <img src="Pictures/Hello World Step.webp" alt="Hello World Step" width="350"/>
 
 displays the name we provided.
+
+## Command Return Values & Failing Jobs
+
+In our “Hello World” example, everything worked as expected and hence the CI run finished with the status “passed” displaying a green checkmark. How does a certain (test) command then tell that something went wrong. The usual way is the return value of the command, also often called **exit or status** value. The status value is a number that will/should be
+
+- **`0`** if everything **worked as expected** or
+- **any other number than `0`** (often `1`) if the command did **not finish successfully**.
+
+Usually you can also **tell certain errors apart from their return value**. For example most shells return `127` if a command was not found.
+
+There are even two simple commands `false` and `true` that do nothing except for setting the status value to:
+
+- `0`: `true` and
+- `1`: `false`.
+
+These values might be **inverted to what you expect from other programming languages** like C, where `0` represents false and all other numbers represent true.
+
+If you want to set the exit value in a program yourself you can usually use a function called `exit` or something similar. For example, you can use the following line of Python code to write your own version of the command `false`:
+
+```py
+exit(1)
+```
+
+Now lets add a new workflow called “Return Values” that we store in a file called `return.yaml` in the directory `.github/workflows`:
+
+```yaml
+name: Return Values
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute command that sets return value to 1
+        # Quotes are required, since the text `false` represent the
+        # **boolean value “false”**. The text `"false"` (with quotes)
+        # on the other hand represent the **string `false`**.
+        run: "false"
+```
+
+After we push our changes we see that there are now two workflows listed under the “Actions” tab of the repository page:
+
+<img src="Pictures/Multiple Workflows.webp" alt="Multiple Workflows" width="300"/>
+
+> **Note:** Workflows are independent of each other, which makes them ideal for doing tasks that are quite different. For example you can use a workflow that builds and deploys documentation, while another workflow tests the software.
+
+While the workflow “Hello World” finished successfully, just like before, the workflow “Return Values” failed as we expected:
+
+<img src="Pictures/Overall Status.webp" alt="Overall Status" width="300"/>
+
+We take a closer look and see that the step “Execute command that sets return value to 1” did indeed set the exit value to 1:
+
+<img src="Pictures/Return Value False.webp" alt="Return Value False" width="450"/>
