@@ -1,9 +1,13 @@
+name: Hello World
+
 on:
   - push
 
 jobs:
   linux:
+    name: 🐧 Ubuntu
     runs-on: ubuntu-latest
 
     steps:
-      - run: printf 'Hello, World\n'
+      - name: Print “Hello, World”
+        run: printf 'Hello, World\n'
