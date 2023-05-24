@@ -1,0 +1,19 @@
+name: Check Code
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Flake8
+        run: python3 -m pip install flake8
+
+      - name: Check code with Flake8
+        run: flake8 .
