@@ -382,3 +382,117 @@ add(4, 5, 6)  # Argument 3 has correct type
 and commit the fixed code. After that both jobs run successfully:
 
 <img src="Pictures/Successfull Run mypy.webp" alt="Successfull Run mypy" width="350"/>
+
+## Using Multiple Software Versions
+
+Sometimes you might want to use the same steps in a job, but use different software (versions) to execute the steps. For example, you might want to change the operating systems or use different Python versions to test software. While you could just copy and paste code and change minor parts of the copied YAML code this can get unwieldy soon. To improve this situation GitHub Actions supports the [`matrix` keyword to define job variations](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs).
+
+In the following example we will check if the modified Python code (`source.py`):
+
+```py
+from pathlib import Path
+
+example_path = Path("some") / "directory" / "something.txt"
+example_path_changed_stem = example_path.with_stem("something else")
+
+print(f"Original:     {example_path}")
+print(f"Changed stem: {example_path_changed_stem}")
+```
+
+works on
+
+- Linux,
+- macOS and
+- Windows
+
+using the Python versions:
+
+- `3.8`,
+- `3.9`,
+- `3.10`, and
+- `3.11`.
+
+For that purpose we update `test.yaml`:
+
+```yaml
+name: Check Code
+
+on:
+  - push
+
+jobs:
+  os-python-matrix:
+    strategy:
+      matrix:
+        os:
+          - name: macos
+            icon: 🍏
+          - name: ubuntu
+            icon: 🐧
+          - name: windows
+            icon: 🪟
+        python-version:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+
+    runs-on: ${{ matrix.os.name }}-latest
+    name: ${{ matrix.os.icon }} Python ${{ matrix.python-version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run example script
+        run: python source.py # Fails on Python 3.8
+```
+
+We use the key `os-python-matrix` (you can choose any non-reserved name here) to define a matrix containing
+
+- three list elements below the key `os` and
+- four elements below the key `python-version`.
+
+This means that GitHub Actions will create 12 jobs (3·4), where `os` and `python-version` will store every possible combination of the list values. For example, the first job will store the dictionary:
+
+```yaml
+name: mac
+icon: 🍏
+```
+
+in `os` while `python-version` will store the string:
+
+```yaml
+"3.8"
+```
+
+To access the values of the matrix we use the [expression](https://docs.github.com/en/actions/learn-github-actions/expressions) syntax `${{ variable }}`.
+
+This way we can make the value of the following variables dynamic:
+
+- `runs-on` to change the used operating system
+- `python-version` in the [Setup Python](https://github.com/actions/setup-python) action to change the used Python version
+
+After we deploy our updates we see that from the 12 jobs:
+
+<img src="Pictures/Job Matrix.webp" alt="Job Matrix" width="150"/>
+
+the job that uses Python `3.8` on Linux failed. The other jobs on Linux finished successfully. The jobs on the other operating systems were canceled, because of the failure of the Linux job.
+
+If we take a closer look at the failed job “🐧 Python 3.8” we see that the `Path` class in Python `3.8` does not support the method `with_stem`
+
+<img src="Pictures/AttributeError Path.webp" alt="Attribute Error Path Object" width="500"/>
+
+To fix this problem we decide to not support Python 3.8 with our script and just remove the line:
+
+```yaml
+- "3.8"
+```
+
+from `test.yaml`. After we do that we see that out code runs successfully for all of the remaining 9 OS/Python combinations:
+
+<img src="Pictures/Job Matrix Fixed.webp" alt="Job Matrix Fixed" width="150"/>
