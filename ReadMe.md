@@ -191,3 +191,80 @@ As you can see this workflow contains three jobs called
 These steps will be executed one after each other. The whole job will fail after the first step that fails. Steps after the first failed step will not be executed. We can see that, if we take a look at the output of our job:
 
 <img src="Pictures/Multiple Steps.webp" alt="Multiple Steps" width="200"/>
+
+## Checking Source Code
+
+Since we are already a little familiar with GitHub Actions it is time to move to our first example that might also be useful in our own projects.
+
+To increase the quality of the code we write we can use (static) **source code checkers** that analyze code and provide suggestions to make it better. In the text below we will write some Python code and then use the style checker [Flake8](https://flake8.pycqa.org) to analyze it.
+
+First we store the simple code for a “Hello World” program below:
+
+```py
+import math
+
+print("Hello, World!")
+```
+
+in a file called `source.py` in the root of our repository. To check the file locally we install `flake8` with `pip`:
+
+```sh
+pip install flake8
+```
+
+and then execute the command:
+
+```sh
+flake8
+```
+
+in the root of the repo. The output of the command:
+
+```
+./source.py:1:1: F401 'math' imported but unused
+```
+
+will tell us that the first line in our source code is more or less useless. Great! Now it is time to move the check for our source code into a GitHub Actions workflow. For that purpose we store the following code in `check.yaml` in the directory `.github/workflows` and remove `multiple steps.yaml`.
+
+```yaml
+name: Check Code
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Flake8
+        run: python3 -m pip install flake8
+
+      - name: Check code with Flake8
+        run: flake8 .
+```
+
+Compared to our previous examples, we notice the new key `uses` in the “Checkout code” step. Here we use the [Checkout “action” provided by GitHub](https://github.com/actions/checkout) instead of relying on a Shell command (key `run`), like we did previously. As you might expect the `checkout` action clones the repository to the current runner, i.e. the computer that executes the workflow.
+
+> **Note:** Usually it makes sense to prefer one of the many [available actions](https://github.com/marketplace?category=&query=&type=actions) to writing the Shell commands yourself, unless your code is trivial. Using “custom” actions usually has the advantages, that you
+>
+> - receive bug fixes for free and
+> - do not need to tailor your code for the [different operating systems of the runner images](https://github.com/actions/runner-images#available-images).
+
+After we commit our files and push the changes, the job “🐧 Ubuntu” in the workflow “Check Code” should fail:
+
+<img src="Pictures/Failed Run Flake8.webp" alt="Failed Run Flake8" width="400"/>
+
+Now it is time to fix `source.py`:
+
+```sh
+print("Hello, World!")
+```
+
+and check that the workflow runs successfully after we push the changes:
+
+<img src="Pictures/Successfull Run Flake8.webp" alt="Successfull Run Flake8" width="300"/>
