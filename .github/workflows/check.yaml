@@ -5,7 +5,7 @@ on:
 
 jobs:
   linux:
-    name: 🐧 Ubuntu
+    name: 🐧 Flake8
     runs-on: ubuntu-latest
 
     steps:
@@ -17,3 +17,17 @@ jobs:
 
       - name: Check code with Flake8
         run: flake8 .
+
+  windows:
+    name: 🪟 Mypy
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install mypy
+        run: python3 -m pip install mypy
+
+      - name: Check code with mypy
+        run: mypy source.py
