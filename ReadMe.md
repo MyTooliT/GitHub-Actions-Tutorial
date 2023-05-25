@@ -268,3 +268,117 @@ print("Hello, World!")
 and check that the workflow runs successfully after we push the changes:
 
 <img src="Pictures/Successfull Run Flake8.webp" alt="Successfull Run Flake8" width="300"/>
+
+## Multiple Jobs
+
+Until now we only used a single job. Often you want to run **multiple things in parallel**. For that purpose you can use an additional job. Let us extend our example from before. This time we also check the code with [mypy][], a static type checker for Python code. We now store the following code in the file `source.py`:
+
+[mypy]: http://mypy-lang.org
+
+```py
+def add(*numbers: float) -> None:
+    print(f"{' + '.join(map(str, numbers))} = {sum(numbers)}")
+
+
+add(1, 2, 3)
+add(4, 5, '6')  # Argument 3 has incorrect type
+```
+
+In the last line of the code above the third argument to `add` is incorrect (`str` instead of `float`). We can find this bug if we just run the code directly:
+
+```sh
+python source.py
+```
+
+and see that the script fails with a `TypeError`:
+
+```
+1 + 2 + 3 = 6
+Traceback (most recent call last):
+  File "source.py", line 6, in <module>
+    add(4, 5, '6')  # Argument 3 has incorrect type
+    ^^^^^^^^^^^^^^
+  File "source.py", line 2, in add
+    print(f"{' + '.join(map(str, numbers))} = {sum(numbers)}")
+                                               ^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+```
+
+However, you usually want to find such errors even before you start a script. Sometimes a **buggy line of code might only be executed under some special circumstances**. In this case you might assume that the code works perfectly fine, even though it contains a serious bug.
+
+To detect such problems, even before you start a script, you can use **static type checkers** like [mypy][]:
+
+```sh
+pip install mypy
+```
+
+We first check our script locally:
+
+```sh
+mypy source.py
+```
+
+and see the following helpful output:
+
+```
+source.py:6: error: Argument 3 to "add" has incompatible type "str"; expected "float"  [arg-type]
+Found 1 error in 1 file (checked 1 source file)
+```
+
+Now it is time to automate the type checking process. While we could use the same job to run both `flake8` and `mypy` we will use two jobs to run these tools in parallel. For our tiny amount of code this might not make much sense, but if your code base is getting bigger running things in parallel might save quite some time.
+
+We update `check.yaml`:
+
+```yaml
+name: Check Code
+
+on:
+  - push
+
+jobs:
+  linux:
+    name: 🐧 Flake8
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Flake8
+        run: python3 -m pip install flake8
+
+      - name: Check code with Flake8
+        run: flake8 .
+
+  windows:
+    name: 🪟 Mypy
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install mypy
+        run: python3 -m pip install mypy
+
+      - name: Check code with mypy
+        run: mypy source.py
+```
+
+Here we used a Windows runner for mypy, not because it makes much sense, but just to show how we can change the runner image, if we want to use a different operating system to execute the code.
+
+> **Note:** If you do not care about the operating system it makes sense to use a Linux runner. Not only do Linux runners usually start faster, they [are also cheaper](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#minute-multipliers) compared to Windows and especially macOS runners, if you use them (in a private repository).
+
+Now it is time to commit our changes (to `source.py` & `check.yaml`) and push the changes to the remote repository. If we take a look at the latest run of the “Check Code” workflow we see the two independent jobs:
+
+<img src="Pictures/Failed Run mypy.webp" alt="Failed Run mypy" width="350"/>
+
+As expected the job `🪟 Mypy` failed, because of the bug in the last line of the script. Flake8 on the other hand was perfectly happy how we formatted/structured the Python code. In a last step we fix the bug in `source.py`:
+
+```py
+add(4, 5, 6)  # Argument 3 has correct type
+```
+
+and commit the fixed code. After that both jobs run successfully:
+
+<img src="Pictures/Successfull Run mypy.webp" alt="Successfull Run mypy" width="350"/>
