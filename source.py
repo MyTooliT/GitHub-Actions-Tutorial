@@ -1,6 +1,7 @@
-def add(*numbers: float) -> None:
-    print(f"{' + '.join(map(str, numbers))} = {sum(numbers)}")
+from pathlib import Path
 
+example_path = Path("some") / "directory" / "something.txt"
+example_path_changed_stem = example_path.with_stem("something else")
 
-add(1, 2, 3)
-add(4, 5, 6)  # Argument 3 has correct type
+print(f"Original:     {example_path}")
+print(f"Changed stem: {example_path_changed_stem}")
