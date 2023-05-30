@@ -20,19 +20,28 @@ description: Very basic tutorial on how to use GitHub Actions based in part on [
 
 ## Hello World
 
-GitHub Actions, like most other CI systems (I know of), reads actions it should execute from [YAML](https://yaml.org) files. These (workflow) files should be stored in the directory `.github/workflows` in the root of the repository.
+GitHub Actions, like most other CI systems (I know of), reads actions/commands it should execute from [YAML](https://yaml.org) files. These (workflow) files are stored in the directory `.github/workflows` in the root of the repository.
 
 In our first example we will create a rather minimal version of such a workflow file:
 
 ```yaml
 on:
+  # Execute workflow every time we push changes to remote
   - push
 
 jobs:
   linux:
+    # Execute actions/command on latest Ubuntu version
+    # For more information on available “runners”, please take
+    # a look here:
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
     runs-on: ubuntu-latest
 
+    # A workflow contains multiple steps (actions/commands), which are
+    # executed after each other. Our workflow contains only a single step.
     steps:
+      # In this step we use the key `run` to execute the command `printf` and
+      # print the text “Hello, World” to the (standard output)
       - run: printf 'Hello, World\n'
 ```
 
@@ -496,3 +505,8 @@ To fix this problem we decide to not support Python 3.8 with our script and just
 from `test.yaml`. After we do that we see that out code runs successfully for all of the remaining 9 OS/Python combinations:
 
 <img src="Pictures/Job Matrix Fixed.webp" alt="Job Matrix Fixed" width="150"/>
+
+## ToDo
+
+- [ ] Combined Actions
+- [ ] Dependent jobs (`needs` keyword)
