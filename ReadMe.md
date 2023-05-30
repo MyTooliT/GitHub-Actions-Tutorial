@@ -506,7 +506,11 @@ from `test.yaml`. After we do that we see that out code runs successfully for al
 
 <img src="Pictures/Job Matrix Fixed.webp" alt="Job Matrix Fixed" width="150"/>
 
-## ToDo
+## Open Topics
 
-- [ ] Combined Actions
-- [ ] Dependent jobs (`needs` keyword)
+While the description above should provide a good introduction on how to use GitHub Actions there are still some topics open for which we might add some description/examples later:
+
+- [ ] Running dependent jobs one after another (keyword `needs`) ([example](https://github.com/MyTooliT/Documentation-Process/blob/172dbcf4077e3fa6461a1849bfcd09514bd459b9/.github/workflows/bookdown.yaml))
+- [ ] Sharing data (between jobs) using the [“Upload Artifact” Action](https://github.com/actions/upload-artifact) ([example](https://github.com/MyTooliT/Documentation-Process/blob/172dbcf4077e3fa6461a1849bfcd09514bd459b9/.github/workflows/bookdown.yaml))
+- [ ] Using [Composite Actions](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action) to combine steps into a reusable action ([example](https://github.com/MyTooliT/ICOlyzer/blob/06f68e9ef8bd3d5609e042f950af30b5418ea212/.github/actions/check-and-test/action.yaml))
+
